@@ -86,7 +86,13 @@
             <div class="form-group row m-2" v-for="(phoneItem, index) in phoneNo" :key="index">
                 <label for="phone{{ index }}" class="col-sm-3 col-form-label">Phone No: {{ index }}</label>
                 <div class="col-sm-9">
-                    <input type="text" id="phone{{ index }}" class="form-control" v-model="phoneNo[index]">
+                    <input type="text"  class="form-control" v-model="phoneNo[index]">
+                </div>
+            </div>
+            <div class="form-group row m-2" v-for="(emailItem, index) in editEmail" :key="index">
+                <label for="phone{{ index }}" class="col-sm-3 col-form-label">Phone No: {{ index }}</label>
+                <div class="col-sm-9">
+                    <input type="text"  class="form-control" v-model="editEmail[index]">
                 </div>
             </div>
             <div class="form-group row m-2">
@@ -116,6 +122,8 @@
              <tbody>
                 <tr v-for="items,index in names" :key="items">
                     <td>{{ Object.values(items.name).join(' ') }}</td>
+
+
                     <td>{{ items.gender }}</td>
                     <td>{{ items.birthday }}</td>
                     <td>{{ Object.values(items.contact.address).join(' ') }}</td>
@@ -151,6 +159,7 @@
                     },gender:'',
                     birthday:'',
                     phoneNo:[],
+                    editEmail:[],
                 };
             },
             methods: {
@@ -226,8 +235,12 @@
                 this.gender = item.gender;
                 this.birthday = item.birthday;
                 this.editIndex = index * (this.activePage + 1);
-                 for (let i = 0; i < item.contact.phone.length; i++) { // <-- Corrected loop condition
-                   this.phoneNo.push(item.contact.phone[i].slice(4)); // <-- Modified push statement
+                 for (let i = 0; i < item.contact.phone.length; i++) { 
+                   this.phoneNo.push(item.contact.phone[i].slice(4)); 
+                }
+                this.editIndex = index * (this.activePage + 1);
+                 for (let i = 0; i < item.contact.email.length; i++) { 
+                   this.editEmail.push(item.contact.email[i]); 
                 }
                 console.log(this.phoneNo);
                 },edit(){                 
@@ -237,11 +250,10 @@
                     this.data[this.editIndex].gender=this.gender;
                     this.data[this.editIndex].birthday=this. birthday;
                     for (let i = 0; i < this.phoneNo.length; i++) {
-                        console.log( i+"-" + this.data[this.editIndex].contact.phone[i]);
-                        console.log(this.data[this.editIndex].contact.region + "-" + this.phoneNo[i]);
-                        this.data[this.editIndex].contact.phone[i] = this.data[this.editIndex].contact.region + "-" + this.phoneNo[i];
-                        console.log(this.data[this.editIndex].contact.phone[i]);
-                        console.log(this.data[this.editIndex].contact.region + "-" + this.phoneNo[i]);
+                        this.data[this.editIndex].contact.phone[i] = this.data[this.editIndex].contact.region + "-" + this.phoneNo[i];    
+                    }
+                    for (let i = 0; i < this.phoneNo.length; i++) {
+                        this.data[this.editIndex].contact.email[i] =  this.editEmail[i];    
                     }
                     this.dataClear();
                     this.buttonSetter();
