@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue.js pagination</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="names_1000.js"></script>
+    <script src="https://unpkg.com/vue@3.1.1/dist/vue.global.prod.js"></script>
+    <style>
+       
+        .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Change the last value (0.5) for the opacity */
+    z-index: 999; /* Adjust z-index as needed to ensure it's on top */
+}
+
+.content {
+    position: absolute;
+    padding: 5px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 500px;
+    height: 280px;
+    background-color: whitesmoke;
+    box-shadow: 2px 2px 3px gray;
+    text-align: center; 
+}
+
+    </style>
+</head>
+<body>
+    <div id="app">
+        
+        <div class="d-flex justify-content-center">
+            <button @click="backward" class="btn btn-secondary m-2"> &lt;- </button>
+            <button v-for="items in button" 
+                    :key="items"
+                    @click="numPage(items)" 
+                   :class="['btn m-2', { 'btn-primary': items === activePage, 'btn-secondary': items !== activePage }]">
+                {{ items + 1 }}
+            </button>
+            <button @click="forward" class="btn btn-secondary m-2"> -&gt; </button>
+        </div>
+        <div class="overlay" v-if="showEdit" >
+        <div class="content">
+           <div style="display: flex; justify-content: space-between;">
+             <div>
+                <h3>edit details</h3>
+             </div>
+             <div >
+                <button @click="closefunction()" class="btn btn-danger">close</button>
+             </div>
+           </div>
+            <form>
+                <div class="d-flex justify-content-center">
+                    <input type="text" placeholder="frist name" v-model="name.fristName" style="margin: 10px">
+                    <input type="text" placeholder="last name" v-model="name.lastName" style="margin: 10px">
+                </div>
+                <div class="d-flex justify-content-center">
+                    <input type="text" placeholder="gender" v-model="gender" >
+                </div>
+                <div class="d-flex justify-content-center">
+                    <input type="text" placeholder="birthday" v-model="birthday" style="margin: 10px">
+                </div>
+                <div class="d-flex justify-content-center">
+                    <input type="number" placeholder="phone number" v-model="phone" style="margin: 10px">
+                </div>
+                <button @click="edit()" class="btn btn-success">submit</button>
+            </form>
+        </div>
+        </div>
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark" style="position: sticky;top: 0;">
+                <tr>
+                    <td>name</td>
+                    <td>gender</td>
+                    <td>DOB</td>
+                    <td>address</td>
+                    <td>phone no</td>
+                    <td>email</td>
+                    <td>likes</td>
+                    <td>member Science</td>
+                    <td>edit</td>
+                </tr>
+            </thead>
+             <tbody>
+                <tr v-for="items,index in names" :key="items">
+                    <td>{{ Object.values(items.name).join(' ') }}</td>
+                    <td>{{ items.gender }}</td>
+                    <td>{{ items.birthday }}</td>
+                    <td>{{ Object.values(items.contact.address).join(' ') }}</td>
+                    <td>{{ items.contact.phone.join(' ') }}</td>
+                    <td>{{ items.contact.email.join(' ') }}</td>
+                    <td>{{ items.likes.join(',') }}</td>
+                    <td>{{ items.memberSince }}</td>
+                    <td><button class="btn btn-primary" @click="editFunction(items,index)"> edit </button></td>
+                </tr>
+             </tbody>
+        </table>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    data: data,
+                    names: [],
+                    button: [],
+                    totalItemsPerPage: 50,
+                    starting: 0,
+                    editIndex:0,
+                    ending: 0,
+                    totalNoOfButton: 0,
+                    activePage:0,
+                    showEdit:false,
+                    name:{
+                        fristName:'datta',
+                        lastName:'sai',
+                    },gender:'',
+                    birthday:'',
+                    phone:0
+                };
+            },
+            methods: {
+                forward() {
+                    this.names.length = 0;
+                    if (this.ending === this.data.length) {
+                        this.starting = 0;
+                        this.activePage=0;
+                        this.ending = this.totalItemsPerPage;
+                    } else {
+                        this.activePage++;
+                        this.starting = this.ending;
+                        this.ending = this.ending + this.totalItemsPerPage;
+                    }
+                    
+                    this.tableSetter();
+                    this.buttonSetter();
+                },
+                backward() {
+                    
+                    this.names.length = 0;
+                    if (this.starting === 0) {
+                        this.activePage=this.totalNoOfButton-1;
+                        this.ending = this.data.length;
+                        this.starting = this.ending - this.totalItemsPerPage;
+                    } else {
+                        this.activePage--;
+                        this.ending = this.starting;
+                        this.starting = this.starting - this.totalItemsPerPage;
+                    }
+                    this.tableSetter();
+                    this.buttonSetter();
+                },
+                numPage(i) {
+                    this.names.length = 0;
+                    this.activePage = i;
+                    this.starting = i * this.totalItemsPerPage;
+                    this.ending = this.starting + this.totalItemsPerPage;
+                    this.tableSetter();
+                    this.buttonSetter();
+                },
+                buttonSetter() {
+                    this.button = [];
+                    this.totalNoOfButton = Math.ceil(this.data.length / this.totalItemsPerPage);
+                    const star=this.activePage-1;
+                    const ending=this.activePage+1;
+                    for (let i = star; i <= ending; i++) {
+                        if(i>this.totalNoOfButton-1){
+                            this.button.push(0);
+                        }else if(this.activePage===0){
+                            if(i===-1){
+                                this.button.push(this.totalNoOfButton-1);
+                            }else{
+                                this.button.push(i);
+                            }
+                        }
+                        else{
+                            this.button.push(i);
+                        }
+                    }
+                },
+                tableSetter() {
+                    this.starting = this.activePage * this.totalItemsPerPage;
+                    this.ending = this.starting + this.totalItemsPerPage;
+                    for (let i = this.starting; i < this.ending && i < this.data.length; i++) {
+                        this.names.push(this.data[i]);
+                    }
+                },editFunction(item,index){
+                    
+                    this.showEdit=!this.showEdit;
+                    this.dataClear();
+                    this.name.fristName=item.name.first;
+                    this.name.lastName=item.name.last;
+                    this.gender=item.gender;
+                    this.birthday=item.birthday;
+                    this.editIndex= index*(this.activePage+1);
+                    this.phone=item.contact.phone[0];
+                                       
+                },edit(){                 
+                    this.showEdit=!this.showEdit;
+                    this.data[this.editIndex].name.first=this.name.fristName;
+                    this.data[this.editIndex].name.last=this.name.lastName;
+                    this.data[this.editIndex].gender=this.gender;
+                    this.data[this.editIndex].birthday=this. birthday;
+                    this.data[this.editIndex].contact.phone[0]=this.phone;
+                    this.buttonSetter();
+                    this.tableSetter();
+                }, dataClear(){
+                    this.name.fristName="";
+                    this.name.lastName=""; 
+                    this.gender="";
+                    this.birthday="";
+                    this.phone=null;
+                },
+                closefunction(){ 
+                    this.showEdit=!this.showEdit;
+                }
+                
+            },
+            mounted() {
+                this.ending = this.totalItemsPerPage;
+                this.totalNoOfButton = Math.ceil(this.data.length / this.totalItemsPerPage);
+                this.buttonSetter();
+                this.tableSetter();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
