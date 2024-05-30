@@ -1,0 +1,151 @@
+<html>
+
+<body>
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<script src="bootstrap/js/bootstrap.min.js"></script>
+	<script src="vue.global.prod.js"></script>
+	<script src="names_1000.json"></script>
+	<div id="app">
+		<object_component v-bind:data="data"></object_component>
+	</div>
+	<script>
+		// v-if, v-for, v-model, v-bind
+
+		var object_component = {
+			data: function () {
+				return {
+					new_key: "", new_value: "", new_type: "string",display_form: false,
+				}
+			},
+			props: ["data"],
+			mounted: function () {
+				console.log("component loaded");
+				// this.$emit("event", "data")
+			},
+			methods: {
+				add_key: function(){
+					if( this.new_type == "object" ){
+						this.data[ this.new_key+'' ] = {"key": "value"};
+					}else if( this.new_type == "list" ){
+						this.data[ this.new_key+'' ] = ["Satish"];
+					}else{
+						this.data[ this.new_key+'' ] = this.new_value+'';
+					}
+					this.new_key = '';this.new_value= '';this.new_type="string";
+					this.display_form = false;
+				}
+			},
+			template: `<ul>
+				<li v-for="v,k in data" >
+					<div style="display:flex; column-gap:10px;"  >
+						<div><input type="button" value="X" v-on:click="del_key(k)"></div>
+						<div v-if="typeof(v)=='object'">{{ k }}: </div>
+						<div v-else>{{ k }}: {{ v }} </div>
+					</div>
+					<div v-if="typeof(v)=='object'&&'length' in v" >
+						<list_component v-bind:data="v" ></list_component>
+					</div>
+					<div v-if="typeof(v)=='object'&&'length' in v==false" >
+						<object_component v-bind:data="v" ></object_component>
+					</div>
+				</li>
+				<li><input type="button" value="+" v-on:click="display_form=true">
+					<div v-if="display_form" style="position:absolute; border:1px solid #ccc; padding:10px; background-color:white; box-shadow: 2px 2px 5px black;" >
+						<div>Add Element</div>
+						<input type="text" v-model="new_key" >
+						<select v-model="new_type" >
+						<option value="string" >string</option>
+						<option value="object" >object</option>
+						<option value="list" >list</option>
+						</select>
+						= <input v-if="new_type=='string'" type="text" v-model="new_value" >
+						<input type="button" value="Add" v-on:click="add_key()">
+					</div>
+				</li>
+			</ul>`
+		};
+		var list_component = {
+			data: function () {
+				return {
+					new_value: "", new_type: "string",display_form: false,
+				}
+			},
+			props: ["data"],
+			mounted: function () {
+				console.log("component loaded");
+				// this.$emit("event", "data")
+			},
+			methods: {
+				add_key: function(){
+					if( this.new_type == "object" ){
+						this.data.push( {"key": "value"} );
+					}else if( this.new_type == "list" ){
+						this.data.push(["Satish"]);
+					}else{
+						this.data.push( this.new_value+'');
+					}
+					this.new_value= '';this.new_type="string";
+					this.display_form = false;
+				}
+			},
+			template: `<ul>
+				<li v-for="v,k in data" >
+					<div style="display:flex; column-gap:10px;"  >
+						<div><input type="button" value="X" v-on:click="del_key(k)"></div>
+						<div v-if="typeof(v)=='object'">{{ k }}: </div>
+						<div v-else>{{ k }}: {{ v }} </div>
+					</div>
+					<div v-if="typeof(v)=='object'" >
+						<div v-if="typeof(v)=='object'&&'length' in v" >
+							<list_component v-bind:data="v" ></list_component>
+						</div>
+						<div v-if="typeof(v)=='object'&&'length' in v==false" >
+							<object_component v-bind:data="v" ></object_component>
+						</div>
+					</div>
+				</li>
+				<li><input type="button" value="+" v-on:click="display_form=true">
+					<div v-if="display_form" style="position:absolute; border:1px solid #ccc; padding:10px; background-color:white; box-shadow: 2px 2px 5px black;" >
+						<div>Add Element</div>
+						<select v-model="new_type" >
+						<option value="string" >string</option>
+						<option value="object" >object</option>
+						<option value="list" >list</option>
+						</select>
+						= <input v-if="new_type=='string'" type="text" v-model="new_value" >
+						<input type="button" value="Add" v-on:click="add_key()">
+					</div>
+				</li>
+			</ul>`
+		};
+
+
+		var app = Vue.createApp({
+			data: function () {
+				return {
+					data: {
+						"a": "soemthng",
+						"b": {
+							"c": "something"
+						}
+					},
+					new_key: "",
+				}
+			},
+			mounted: function () {
+			},
+			methods: {
+				add_key: function(){
+					this.data[ this.new_key+'' ] = "something";
+					this.new_key = '';
+				}
+			}
+		});
+		app.component("object_component", object_component);
+		app.component("list_component", list_component);
+		app.mount("#app");
+
+	</script>
+</body>
+
+</html>
